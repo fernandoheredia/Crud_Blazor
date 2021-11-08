@@ -1,0 +1,94 @@
+﻿@page "/materia"
+@inject IHttpService http
+
+
+    
+        <form style="background-color:crimson;">
+            <h2 class="text-center">Materia</h2>
+            <br />
+            <a class="btn btn-primary" href="materias/crear">Nuevo</a>
+            <br />
+        </form>
+
+        <table class=" table table-secondary">
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+            </tr>
+            @if (materias == null)
+            {
+<tr>Cargando.....</tr> }
+            else if (materias.Count == 0)
+            {
+<tr>No existen materias</tr> }
+            else
+            {
+@foreach (var item in materias)
+{
+<tr>
+    <td>@item.CodMateria</td>
+    <td>@item.NombreMateria</td>
+    <td>
+        <a class="btn btn-success"
+           href="materias/editar/@item.Id">
+            Editar
+        </a>
+    </td>
+    <td><button class="btn btn-dark" @onclick="()=>Eliminar(item)">Eliminar</button></td>
+</tr>}}
+        </table>
+    
+
+    <Confirmacion @ref="confirmacion"
+                  onConfirm="GrabarEliminar"
+                  onCancel="Cancelar"
+                  Titulo="BORRAR"
+                  textCancelar="Salir"
+                  textOk="Aceptar">
+        <div>¿Desea eliminar el país @eliminarMaterias.NombreMateria?</div>
+    </Confirmacion>
+
+
+    @code { List<Locacion.Comunes.Data.Entidades.materia> materias
+        ;
+        Confirmacion confirmacion;
+        Locacion.Comunes.Data.Entidades.materia eliminarMaterias;
+
+        protected override async Task OnInitializedAsync()
+        {
+            base.OnInitialized();
+            await Leer();
+        }
+
+        private async Task Leer()
+        {
+            var respuestaHttp = await http.Get<List<Locacion.Comunes.Data.Entidades.materia>>("api/materias");
+            if (!respuestaHttp.Error)
+            {
+                materias = respuestaHttp.Respuesta;
+            }
+        }
+
+        private void Eliminar(Locacion.Comunes.Data.Entidades.materia paisEliminar)
+        {
+            confirmacion.Mostrar();
+            eliminarMaterias = paisEliminar;
+        }
+
+
+        private async Task GrabarEliminar()
+        {
+            var respuesta = await http.Delete($"api/materias/{eliminarMaterias.Id}");
+            if (respuesta.Error)
+            {
+                var body = await respuesta.GetBody();
+            }
+            Cancelar();
+            await Leer();
+        }
+
+        private void Cancelar()
+        {
+            confirmacion.Ocultar();
+            eliminarMaterias = null;
+        } }

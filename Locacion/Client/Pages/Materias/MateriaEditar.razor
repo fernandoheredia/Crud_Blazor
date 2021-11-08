@@ -1,0 +1,45 @@
+﻿@page "/materias/editar/{MateriaId:int}"
+@inject NavigationManager navigationManager
+@inject IHttpService http
+
+<h2>Modificar Materia</h2>
+<MateriaFormulario onValidSubmit="GrabarModificacion" Materia="materias" onCancel="Cancelar" />
+
+@code {
+    private materia materias= new();
+    [Parameter] public int MateriaId { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await MostrarPais();
+    }
+
+    private async Task MostrarPais()
+    {
+        var httpRespuesta = await http.Get<materia>($"api/materias/{MateriaId}");
+        if (httpRespuesta.Error)
+        {
+            var body = await httpRespuesta.GetBody();
+        }
+        else
+        {
+            materias = httpRespuesta.Respuesta;
+        }
+    }
+
+    private async Task GrabarModificacion()
+    {
+        var httpRespuesta = await http.Put<materia>($"api/materias/{MateriaId}", materias);
+        if (httpRespuesta.Error)
+        {
+            var body = await httpRespuesta.GetBody();
+        }
+        navigationManager.NavigateTo("/materia");
+    }
+
+    private void Cancelar()
+    {
+        navigationManager.NavigateTo("/materia");
+    }
+
+}

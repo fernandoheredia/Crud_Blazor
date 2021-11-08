@@ -1,0 +1,27 @@
+﻿@page "/materias/crear"
+@inject NavigationManager navigationManager
+@inject IHttpService http
+
+<h2>Nuevo Materia</h2>
+
+<MateriaFormulario onValidSubmit="GrabarNuevo" Materia="materia" onCancel="Cancelar" />
+
+@code {
+    private materia materia= new();
+
+    private async Task GrabarNuevo()
+    {
+        var httpRespuesta = await http.Post<materia>("api/materias", materia);
+        if (httpRespuesta.Error)
+        {
+            var body = await httpRespuesta.GetBody();
+        }
+        navigationManager.NavigateTo("/materia");
+    }
+
+    private void Cancelar()
+    {
+        navigationManager.NavigateTo("/materia");
+    }
+
+}
